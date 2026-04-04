@@ -1,4 +1,4 @@
-const GAS_URL = "ここにGASのWebアプリURL";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwzLWMcHFhut_G8bWmoBkVtvQUR4XtG9ge3M-3O3MzqbJj4Wx-Tbwzlxz5ohvJXXqGf/exec";
 
 async function fetchSlots() {
   const res = await fetch(GAS_URL, {
@@ -25,7 +25,7 @@ function renderSlots(slots) {
 }
 
 async function main() {
-  await liff.init({ liffId: "ここにLIFF ID" });
+  await liff.init({ liffId: "2009690638-qEYZlp9U" });
   fetchSlots();
 }
 
