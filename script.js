@@ -1,4 +1,4 @@
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwzLWMcHFhut_G8bWmoBkVtvQUR4XtG9ge3M-3O3MzqbJj4Wx-Tbwzlxz5ohvJXXqGf/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxTyOy6lOtQwpO4_Ms54XaI_0lHsoaSxGR-pphj-K2pQ7H4jWom6e32yahMx5RK2ch8/exec";
 
 async function fetchSlots() {
   const res = await fetch(GAS_URL, {
