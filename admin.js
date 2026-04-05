@@ -1,4 +1,4 @@
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxLL7kf1Hw-ektLYRnW4DI2MRTBhS3f-_LZZtsUWgJrNAzWAQlxc8FR04K3A5_3Po/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxLL7kf1Hw-ektLYRnW4DI2MRTBhS3f-_LZZtsUWgJrNAzWAQzIxc8FR04K3A5_3Po/exec";
 
 async function loadReservations() {
   const res = await fetch(GAS_URL, {
