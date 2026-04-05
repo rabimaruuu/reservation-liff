@@ -42,6 +42,17 @@ async function main() {
     await liff.init({ liffId: "2009690638-qEYZlp9U" });
     console.log("liff.init 完了");
 
+    // ▼ ここでログインしていなければログインさせる
+    if (!liff.isLoggedIn()) {
+        liff.login();
+        return;
+    }
+
+    // ▼ ログイン済みならユーザー情報を取得
+    const profile = await liff.getProfile();
+    console.log("ユーザー情報:", profile);
+
+    // ▼ 予約枠を取得
     fetchSlots();
 }
 
