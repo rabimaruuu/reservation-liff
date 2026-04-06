@@ -57,7 +57,9 @@ async function main() {
     }
 
     // ▼ ログインしていなくても予約枠は取得する
+    console.log("fetchSlots() を呼ぶ直前");
     fetchSlots();
+
 }
 
 main();
