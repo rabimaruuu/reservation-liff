@@ -43,10 +43,10 @@ async function main() {
     console.log("liff.init 完了");
 
     // ▼ ここでログインしていなければログインさせる
-    if (!liff.isLoggedIn()) {
-        liff.login();
-        return;
-    }
+//    if (!liff.isLoggedIn()) {
+//        liff.login();
+//        return;
+//    }
 
     // ▼ ログイン済みならユーザー情報を取得
     const profile = await liff.getProfile();
