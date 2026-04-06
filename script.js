@@ -42,17 +42,21 @@ async function main() {
     await liff.init({ liffId: "2009690638-qEYZlp9U" });
     console.log("liff.init 完了");
 
-    // ▼ ここでログインしていなければログインさせる
-//    if (!liff.isLoggedIn()) {
-//        liff.login();
-//        return;
-//    }
+    let profile = null;
 
-    // ▼ ログイン済みならユーザー情報を取得
-    const profile = await liff.getProfile();
-    console.log("ユーザー情報:", profile);
+    // ログインしている場合だけプロフィール取得
+    if (liff.isLoggedIn()) {
+        try {
+            profile = await liff.getProfile();
+            console.log("ユーザー情報:", profile);
+        } catch (e) {
+            console.log("プロフィール取得失敗:", e);
+        }
+    } else {
+        console.log("ログインしていません（検証モード）");
+    }
 
-    // ▼ 予約枠を取得
+    // ▼ ログインしていなくても予約枠は取得する
     fetchSlots();
 }
 
