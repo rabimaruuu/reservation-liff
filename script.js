@@ -5,18 +5,24 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbzSlglWYwjooOP5jOt9MCYS
 async function fetchSlots() {
     console.log("fetchSlots() 実行");
 
-    const res = await fetch(GAS_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: "getSlots" })
-    });
+    try {
+        const res = await fetch(GAS_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "getSlots" })
+        });
 
-    console.log("fetchSlots() 取得完了");
+        console.log("fetchSlots() レスポンス:", res);
 
-    const slots = await res.json();
-    console.log("取得した slots:", slots);
+        const slots = await res.json();
+        console.log("取得した slots:", slots);
 
-    renderSlots(slots);
+        renderSlots(slots);
+    } catch (err) {
+        console.error("fetchSlots() エラー:", err);
+    }
 }
+
 
 function renderSlots(slots) {
     console.log("renderSlots() 実行");
