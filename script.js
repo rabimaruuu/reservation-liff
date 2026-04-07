@@ -1,7 +1,6 @@
 console.log("script.js 読み込まれた");
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzSlglWYwjooOP5jOt9MCYS9FSWEAkUvgrc57z6JYoXfSQiSxgFarcaxU4tyOExXwQZ/exec";
-
+const GAS_URL = window.APP_CONFIG.GAS_URL;
 async function fetchSlots() {
     console.log("fetchSlots() 実行");
 
