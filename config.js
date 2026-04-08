@@ -1,3 +1,3 @@
 window.APP_CONFIG = {
-  GAS_URL: "https://script.google.com/macros/s/AKfycbxjr2V3OXMwYkItRZAevKhw2w_8ufgchZ0fa6wezskfa0ff-ma5HiMTTlR4URw4_QsJ/exec"
+  GAS_URL: "https://script.google.com/macros/s/AKfycbx3jxssH_MXGB7N30z8jHHqU0dke6VVnNRN4IXHHJxaK79SPYMLKZo7ViMZdZIblLXk/exec"
 };
