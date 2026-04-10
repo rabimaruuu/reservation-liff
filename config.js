@@ -1,3 +1,3 @@
 window.APP_CONFIG = {
-  GAS_URL: "https://script.google.com/macros/s/AKfycbwiCRHWnlATUI7VzHsEIKpQgeFoYnp7MPNtfSktc_FXHIE4dxdKpo9mCW1WBR9vMQ49/exec"
+    GAS_URL: "https://asia-northeast1-reservation-system-492915.cloudfunctions.net/api"
 };
