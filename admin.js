@@ -30,10 +30,13 @@ async function deleteRes(slotId) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             action: "deleteReservation",
-            slotId: slotId
+            slotId: slotId,
+            calendarId: "5435128daa986e7c47f273f31fa5cd8063fa90171d838de5d9222f4a3b7c9dfa@group.calendar.google.com" // ← オンライン用
         })
     });
 
+    fetchReservations();
+}
     fetchReservations();
 }
 
