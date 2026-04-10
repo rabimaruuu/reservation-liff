@@ -1,15 +1,31 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>予約システム</title>
-</head>
 <body>
-  <h2>空き枠一覧</h2>
-  <div id="slots"></div>
 
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script src="config.js?v=20260414"></script>
-  <script src="script.js?v=20260414"></script>
+  <!-- タブ -->
+  <div class="type-tabs">
+      <button id="tab-online" class="active">オンライン</button>
+      <button id="tab-offline">対面</button>
+  </div>
+
+  <!-- カレンダー -->
+  <div id="calendar"></div>
+
+  <!-- 枠一覧 -->
+  <div id="slot-list">
+      <h3 id="slot-title"></h3>
+      <div id="slots"></div>
+  </div>
+
+  <!-- モーダル -->
+  <div id="confirm-modal" class="modal">
+    <div class="modal-content">
+      <h3>予約内容の確認</h3>
+      <p id="confirm-text"></p>
+      <button id="confirm-ok">予約する</button>
+      <button id="confirm-cancel">キャンセル</button>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+
 </body>
-</html>
