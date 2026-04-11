@@ -1,3 +1,5 @@
+console.log("script.js 読み込み OK");
+
 // ===============================
 // 設定
 // ===============================
@@ -15,17 +17,21 @@ let userId = null;
 // LIFF 初期化
 // ===============================
 async function initLIFF() {
-  await liff.init({ liffId: "2009690638-qEYZlp9U" });
+  try {
+    await liff.init({ liffId: "2009690638-qEYZlp9U" });
 
-  if (!liff.isLoggedIn()) {
-    liff.login();
-    return;
+    if (!liff.isLoggedIn()) {
+      liff.login();
+      return;
+    }
+
+    const profile = await liff.getProfile();
+    userId = profile.userId;
+
+    loadSlots();
+  } catch (e) {
+    console.error("LIFF 初期化エラー:", e);
   }
-
-  const profile = await liff.getProfile();
-  userId = profile.userId;
-
-  loadSlots();
 }
 
 document.addEventListener("DOMContentLoaded", initLIFF);
@@ -81,18 +87,20 @@ function renderSlots(events) {
 // モーダル表示
 // ===============================
 function openModal(event) {
-  const modal = document.getElementById("modal");
+  const modal = document.getElementById("confirm-modal");
   modal.style.display = "block";
 
-  document.getElementById("modal-date").textContent =
+  document.getElementById("confirm-text").textContent =
     new Date(event.start.dateTime).toLocaleString();
 
-  document.getElementById("confirm-btn").onclick = () => reserve(event);
+  document.getElementById("confirm-ok").onclick = () => reserve(event);
 }
 
 function closeModal() {
-  document.getElementById("modal").style.display = "none";
+  document.getElementById("confirm-modal").style.display = "none";
 }
+
+document.getElementById("confirm-cancel").onclick = closeModal;
 
 // ===============================
 // 予約作成
@@ -138,7 +146,12 @@ function showLoading(show) {
 // ===============================
 // タブ切り替え
 // ===============================
-function switchType(type) {
-  currentType = type;
+document.getElementById("tab-online").addEventListener("click", () => {
+  currentType = "online";
   loadSlots();
-}
+});
+
+document.getElementById("tab-offline").addEventListener("click", () => {
+  currentType = "offline";
+  loadSlots();
+});
