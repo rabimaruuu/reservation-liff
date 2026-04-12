@@ -164,7 +164,8 @@ async function reserve(event, type) {
         action: "reserve",
         event,
         userId,
-        type
+        type,
+        calendarId: SLOT_CALENDAR_ID   // ← これが必須！
       })
     });
 
