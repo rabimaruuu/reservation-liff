@@ -127,4 +127,60 @@ function openModal(event) {
   const dt = new Date(event.start.dateTime);
   const typeLabel = currentType === "online" ? "オンライン" : "対面";
 
-  document.get
+  document.getElementById("confirm-text").textContent =
+    `${typeLabel} / ${dt.toLocaleString()}`;
+
+  document.getElementById("confirm-ok").onclick = () => reserve(event, currentType);
+}
+
+function closeModal() {
+  document.getElementById("confirm-modal").style.display = "none";
+}
+
+document.getElementById("confirm-cancel").onclick = closeModal;
+
+// ===============================
+// 予約作成（枠は消さない）
+// ===============================
+async function reserve(event, type) {
+  showLoading(true);
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "reserve",
+        event,
+        userId,
+        type
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.status === "success") {
+      alert("予約が完了しました！");
+      closeModal();
+      loadSlots();
+    } else if (data.message === "already_reserved") {
+      alert("すみません、この枠はすでに予約されました。");
+      closeModal();
+      loadSlots();
+    } else {
+      alert("予約に失敗しました");
+    }
+  } catch (e) {
+    console.error(e);
+    alert("通信エラーが発生しました");
+  }
+
+  showLoading(false);
+}
+
+// ===============================
+// ローディング表示
+// ===============================
+function showLoading(show) {
+  document.getElementById("loading").style.display = show ? "block" : "none";
+}
