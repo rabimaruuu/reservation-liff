@@ -5,11 +5,11 @@ console.log("script.js 読み込み OK");
 // ===============================
 const API_URL = window.APP_CONFIG.API_URL;
 
-const CALENDAR_IDS = {
-  online: "5435128daa986e7c47f273f31fa5cd8063fa90171d838de5d9222f4a3b7c9dfa@group.calendar.google.com",
-  offline: "227a3545d36419e11e531495bbfeca568bb2b4494052b01b4574adbc1973ea27@group.calendar.google.com"
-};
+// 予約枠カレンダー（空き枠台帳）
+const SLOT_CALENDAR_ID =
+  "0ecbe769b531bfb9c87a4633763a3e4f9832e0b108fe0955b175b978f7493370@group.calendar.google.com";
 
+// オンライン / 対面の区別（予約イベント用）
 let currentType = "online";
 let userId = null;
 
@@ -61,12 +61,11 @@ function setupTabs() {
     loadSlots();
   });
 
-  // 初期表示
   title.textContent = "オンラインの空き枠";
 }
 
 // ===============================
-// 予約枠取得
+// 予約枠取得（枠カレンダーのみ）
 // ===============================
 async function loadSlots() {
   showLoading(true);
@@ -77,17 +76,12 @@ async function loadSlots() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         action: "getSlots",
-        calendarId: CALENDAR_IDS[currentType]
+        calendarId: SLOT_CALENDAR_ID
       })
     });
 
     const data = await res.json();
-    if (Array.isArray(data)) {
-      renderSlots(data);
-    } else {
-      console.error("getSlots 応答異常:", data);
-      alert("予約枠の取得に失敗しました");
-    }
+    renderSlots(data);
   } catch (e) {
     console.error(e);
     alert("予約枠の取得に失敗しました");
@@ -133,58 +127,4 @@ function openModal(event) {
   const dt = new Date(event.start.dateTime);
   const typeLabel = currentType === "online" ? "オンライン" : "対面";
 
-  document.getElementById("confirm-text").textContent =
-    `${typeLabel} / ${dt.toLocaleString()}`;
-
-  document.getElementById("confirm-ok").onclick = () => reserve(event, currentType);
-}
-
-function closeModal() {
-  document.getElementById("confirm-modal").style.display = "none";
-}
-
-document.getElementById("confirm-cancel").onclick = closeModal;
-
-// ===============================
-// 予約作成（予約枠削除 → 予約イベント作成）
-// ===============================
-async function reserve(event, type) {
-  showLoading(true);
-
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "reserve",
-        calendarId: CALENDAR_IDS[currentType],
-        event,
-        userId,
-        type
-      })
-    });
-
-    const data = await res.json();
-
-    if (data.status === "success") {
-      alert("予約が完了しました！");
-      closeModal();
-      loadSlots();
-    } else {
-      console.error("reserve 応答異常:", data);
-      alert("予約に失敗しました");
-    }
-  } catch (e) {
-    console.error(e);
-    alert("通信エラーが発生しました");
-  }
-
-  showLoading(false);
-}
-
-// ===============================
-// ローディング表示
-// ===============================
-function showLoading(show) {
-  document.getElementById("loading").style.display = show ? "block" : "none";
-}
+  document.get
