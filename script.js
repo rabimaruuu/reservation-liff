@@ -17,24 +17,35 @@ let userId = null;
 // LIFF 初期化
 // ===============================
 async function initLIFF() {
+  console.log("initLIFF start");
+
   try {
     await liff.init({ liffId: "2009690638-qEYZlp9U" });
+    console.log("liff.init OK");
 
     if (!liff.isLoggedIn()) {
-      liff.login();
+      console.log("not logged in");
+      liff.login({ redirectUri: window.location.href });
       return;
     }
 
+    console.log("logged in");
+
     const profile = await liff.getProfile();
+    console.log("profile:", profile);
+
     userId = profile.userId;
 
+    console.log("setupTabs");
     setupTabs();
+
+    console.log("loadSlots");
     loadSlots();
+
   } catch (e) {
     console.error("LIFF 初期化エラー:", e);
   }
 }
-
 document.addEventListener("DOMContentLoaded", initLIFF);
 
 // ===============================
