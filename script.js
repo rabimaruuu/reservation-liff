@@ -20,7 +20,7 @@ async function initLIFF() {
   console.log("initLIFF start");
 
   try {
-    await liff.init({ liffId: "2009690638-qEYZlp9U" });
+    await liff.init({ liffId: "2009777389-GQo5v4s4" });
     console.log("liff.init OK");
 
     if (!liff.isLoggedIn()) {
