@@ -28,6 +28,7 @@ async function initLIFF() {
     const profile = await liff.getProfile();
     userId = profile.userId;
 
+    setupTabs();
     loadSlots();
   } catch (e) {
     console.error("LIFF 初期化エラー:", e);
@@ -35,6 +36,34 @@ async function initLIFF() {
 }
 
 document.addEventListener("DOMContentLoaded", initLIFF);
+
+// ===============================
+// タブ切り替え
+// ===============================
+function setupTabs() {
+  const tabOnline = document.getElementById("tab-online");
+  const tabOffline = document.getElementById("tab-offline");
+  const title = document.getElementById("slot-title");
+
+  tabOnline.addEventListener("click", () => {
+    currentType = "online";
+    tabOnline.classList.add("active");
+    tabOffline.classList.remove("active");
+    title.textContent = "オンラインの空き枠";
+    loadSlots();
+  });
+
+  tabOffline.addEventListener("click", () => {
+    currentType = "offline";
+    tabOffline.classList.add("active");
+    tabOnline.classList.remove("active");
+    title.textContent = "対面の空き枠";
+    loadSlots();
+  });
+
+  // 初期表示
+  title.textContent = "オンラインの空き枠";
+}
 
 // ===============================
 // 予約枠取得
@@ -53,8 +82,14 @@ async function loadSlots() {
     });
 
     const data = await res.json();
-    renderSlots(data);
+    if (Array.isArray(data)) {
+      renderSlots(data);
+    } else {
+      console.error("getSlots 応答異常:", data);
+      alert("予約枠の取得に失敗しました");
+    }
   } catch (e) {
+    console.error(e);
     alert("予約枠の取得に失敗しました");
   }
 
@@ -74,10 +109,15 @@ function renderSlots(events) {
   }
 
   events.forEach(ev => {
+    if (!ev.start || !ev.start.dateTime) return;
+
     const start = new Date(ev.start.dateTime);
     const btn = document.createElement("button");
     btn.className = "slot-btn";
-    btn.textContent = `${start.getMonth() + 1}/${start.getDate()} ${start.getHours()}:${String(start.getMinutes()).padStart(2, "0")}`;
+    btn.textContent =
+      `${start.getMonth() + 1}/${start.getDate()} ` +
+      `${start.getHours()}:${String(start.getMinutes()).padStart(2, "0")}`;
+
     btn.onclick = () => openModal(ev);
     container.appendChild(btn);
   });
@@ -90,10 +130,13 @@ function openModal(event) {
   const modal = document.getElementById("confirm-modal");
   modal.style.display = "block";
 
-  document.getElementById("confirm-text").textContent =
-    new Date(event.start.dateTime).toLocaleString();
+  const dt = new Date(event.start.dateTime);
+  const typeLabel = currentType === "online" ? "オンライン" : "対面";
 
-  document.getElementById("confirm-ok").onclick = () => reserve(event);
+  document.getElementById("confirm-text").textContent =
+    `${typeLabel} / ${dt.toLocaleString()}`;
+
+  document.getElementById("confirm-ok").onclick = () => reserve(event, currentType);
 }
 
 function closeModal() {
@@ -103,9 +146,9 @@ function closeModal() {
 document.getElementById("confirm-cancel").onclick = closeModal;
 
 // ===============================
-// 予約作成
+// 予約作成（予約枠削除 → 予約イベント作成）
 // ===============================
-async function reserve(event) {
+async function reserve(event, type) {
   showLoading(true);
 
   try {
@@ -116,7 +159,8 @@ async function reserve(event) {
         action: "reserve",
         calendarId: CALENDAR_IDS[currentType],
         event,
-        userId
+        userId,
+        type
       })
     });
 
@@ -127,9 +171,11 @@ async function reserve(event) {
       closeModal();
       loadSlots();
     } else {
+      console.error("reserve 応答異常:", data);
       alert("予約に失敗しました");
     }
   } catch (e) {
+    console.error(e);
     alert("通信エラーが発生しました");
   }
 
@@ -142,16 +188,3 @@ async function reserve(event) {
 function showLoading(show) {
   document.getElementById("loading").style.display = show ? "block" : "none";
 }
-
-// ===============================
-// タブ切り替え
-// ===============================
-document.getElementById("tab-online").addEventListener("click", () => {
-  currentType = "online";
-  loadSlots();
-});
-
-document.getElementById("tab-offline").addEventListener("click", () => {
-  currentType = "offline";
-  loadSlots();
-});
