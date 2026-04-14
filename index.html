@@ -16,14 +16,20 @@
   </div>
 
   <!-- モーダル -->
-  <div id="confirm-modal" class="modal">
-    <div class="modal-content">
-      <h3>予約内容の確認</h3>
-      <p id="confirm-text"></p>
-      <button id="confirm-ok">予約する</button>
-      <button id="confirm-cancel">キャンセル</button>
-    </div>
+<div id="confirm-modal" class="modal">
+  <div class="modal-content">
+    <p id="confirm-text"></p>
+
+    <label>開始時間</label>
+    <select id="start-time"></select>
+
+    <label>終了時間</label>
+    <select id="end-time"></select>
+
+    <button id="confirm-ok">予約する</button>
+    <button id="confirm-cancel">キャンセル</button>
   </div>
+</div>
 
   <!-- ローディング -->
   <div id="loading" style="display:none;">読み込み中...</div>
