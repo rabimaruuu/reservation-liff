@@ -9,7 +9,6 @@ const API_URL = window.APP_CONFIG.API_URL;
 const SLOT_CALENDAR_ID =
   "0ecbe769b531bfb9c87a4633763a3e4f9832e0b108fe0955b175b978f7493370@group.calendar.google.com";
 
-// オンライン / 対面の区別（予約イベント用）
 let currentType = "online";
 let userId = null;
 
@@ -17,31 +16,19 @@ let userId = null;
 // LIFF 初期化
 // ===============================
 async function initLIFF() {
-  console.log("initLIFF start");
-
   try {
     await liff.init({ liffId: "2009777389-GQo5v4s4" });
-    console.log("liff.init OK");
 
     if (!liff.isLoggedIn()) {
-      console.log("not logged in");
       liff.login({ redirectUri: window.location.href });
       return;
     }
 
-    console.log("logged in");
-
     const profile = await liff.getProfile();
-    console.log("profile:", profile);
-
     userId = profile.userId;
 
-    console.log("setupTabs");
     setupTabs();
-
-    console.log("loadSlots");
     loadSlots();
-
   } catch (e) {
     console.error("LIFF 初期化エラー:", e);
   }
@@ -76,7 +63,7 @@ function setupTabs() {
 }
 
 // ===============================
-// 予約枠取得（枠カレンダーのみ）
+// 予約枠取得
 // ===============================
 async function loadSlots() {
   showLoading(true);
@@ -102,7 +89,7 @@ async function loadSlots() {
 }
 
 // ===============================
-// 予約枠の表示
+// 予約枠表示
 // ===============================
 function renderSlots(events) {
   const container = document.getElementById("slots");
@@ -117,11 +104,14 @@ function renderSlots(events) {
     if (!ev.start || !ev.start.dateTime) return;
 
     const start = new Date(ev.start.dateTime);
+    const end = new Date(ev.end.dateTime);
+
     const btn = document.createElement("button");
     btn.className = "slot-btn";
     btn.textContent =
       `${start.getMonth() + 1}/${start.getDate()} ` +
-      `${start.getHours()}:${String(start.getMinutes()).padStart(2, "0")}`;
+      `${start.getHours()}:${String(start.getMinutes()).padStart(2, "0")}〜` +
+      `${end.getHours()}:${String(end.getMinutes()).padStart(2, "0")}`;
 
     btn.onclick = () => openModal(ev);
     container.appendChild(btn);
@@ -129,31 +119,81 @@ function renderSlots(events) {
 }
 
 // ===============================
-// モーダル表示
+// 30分刻みの時間リスト生成
+// ===============================
+function generateTimeSlots(startDate, endDate) {
+  const slots = [];
+  let current = new Date(startDate);
+
+  while (current < endDate) {
+    slots.push(new Date(current));
+    current = new Date(current.getTime() + 30 * 60 * 1000);
+  }
+
+  return slots;
+}
+
+// ===============================
+// モーダル表示（開始/終了選択）
 // ===============================
 function openModal(event) {
   const modal = document.getElementById("confirm-modal");
   modal.style.display = "block";
 
-  const dt = new Date(event.start.dateTime);
+  const start = new Date(event.start.dateTime);
+  const end = new Date(event.end.dateTime);
+
   const typeLabel = currentType === "online" ? "オンライン" : "対面";
-
   document.getElementById("confirm-text").textContent =
-    `${typeLabel} / ${dt.toLocaleString()}`;
+    `${typeLabel} / ${start.toLocaleString()}〜${end.toLocaleString()}`;
 
-  document.getElementById("confirm-ok").onclick = () => reserve(event, currentType);
+  const slots = generateTimeSlots(start, end);
+
+  const startSelect = document.getElementById("start-time");
+  const endSelect = document.getElementById("end-time");
+
+  startSelect.innerHTML = "";
+  endSelect.innerHTML = "";
+
+  // 開始時間
+  slots.forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s.toISOString();
+    opt.textContent = s.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    startSelect.appendChild(opt);
+  });
+
+  // 終了時間（開始より後のみ）
+  startSelect.onchange = () => {
+    const selectedStart = new Date(startSelect.value);
+    endSelect.innerHTML = "";
+
+    slots.forEach(s => {
+      if (s > selectedStart) {
+        const opt = document.createElement("option");
+        opt.value = s.toISOString();
+        opt.textContent = s.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        endSelect.appendChild(opt);
+      }
+    });
+  };
+
+  startSelect.dispatchEvent(new Event("change"));
+
+  document.getElementById("confirm-ok").onclick = () => {
+    reserve(event, currentType, startSelect.value, endSelect.value);
+  };
 }
 
 function closeModal() {
   document.getElementById("confirm-modal").style.display = "none";
 }
-
 document.getElementById("confirm-cancel").onclick = closeModal;
 
 // ===============================
-// 予約作成（枠は消さない）
+// 予約作成
 // ===============================
-async function reserve(event, type) {
+async function reserve(event, type, startTime, endTime) {
   showLoading(true);
 
   try {
@@ -162,10 +202,10 @@ async function reserve(event, type) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         action: "reserve",
-        event,
         userId,
         type,
-        calendarId: SLOT_CALENDAR_ID   // ← これが必須！
+        start: startTime,
+        end: endTime
       })
     });
 
@@ -176,7 +216,7 @@ async function reserve(event, type) {
       closeModal();
       loadSlots();
     } else if (data.message === "already_reserved") {
-      alert("すみません、この枠はすでに予約されました。");
+      alert("すみません、この時間帯はすでに予約があります。");
       closeModal();
       loadSlots();
     } else {
@@ -191,7 +231,7 @@ async function reserve(event, type) {
 }
 
 // ===============================
-// ローディング表示
+// ローディング
 // ===============================
 function showLoading(show) {
   document.getElementById("loading").style.display = show ? "block" : "none";
