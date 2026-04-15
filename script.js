@@ -9,7 +9,7 @@ let currentType = "online"; // デフォルトはオンライン
 // LIFF 初期化
 // ===============================
 window.onload = async () => {
-  await liff.init({ liffId: LIFF_ID });
+  await liff.init({ liffId: APP_CONFIG.LIFF_ID });
 
   if (!liff.isLoggedIn()) {
     liff.login();
