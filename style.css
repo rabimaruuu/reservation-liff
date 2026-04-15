@@ -136,6 +136,45 @@ body {
   font-size: 16px;
   cursor: pointer;
 }
+/* ===============================
+   月間カレンダー
+================================ */
+#month-calendar {
+  padding: 15px;
+}
+
+#calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+#calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.calendar-cell {
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #ddd;
+  text-align: center;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.calendar-cell.has-slot {
+  background: #e6f2ff;
+  border-color: #4a90e2;
+}
+
+.calendar-cell.today {
+  background: #ffe9b3;
+  border-color: #ffb300;
+}
 
 /* ===============================
    ローディング
