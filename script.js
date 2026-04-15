@@ -40,12 +40,11 @@ document.getElementById("tab-offline").onclick = () => {
 // 予約枠取得（Cloud Functions）
 // ===============================
 async function getSlots() {
-  const res = await fetch(API_URL, {
+  const res = await fetch(APP_CONFIG.API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      action: "getSlots",
-      type: currentType
+      action: "getSlots"
     })
   });
 
@@ -138,7 +137,7 @@ function openConfirm(start, end) {
 async function reserve(start, end) {
   const userId = liff.getContext().userId;
 
-  const res = await fetch(API_URL, {
+  const res = await fetch(APP_CONFIG.API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
