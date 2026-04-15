@@ -1,9 +1,62 @@
+// ===============================
+// 初期設定
+// ===============================
 let currentYear = new Date().getFullYear();
 let currentMonth = new Date().getMonth(); // 0-11
+let currentType = "online"; // デフォルトはオンライン
 
+// ===============================
+// LIFF 初期化
+// ===============================
+window.onload = async () => {
+  await liff.init({ liffId: LIFF_ID });
+
+  if (!liff.isLoggedIn()) {
+    liff.login();
+    return;
+  }
+
+  renderMonthCalendar();
+};
+
+// ===============================
+// オンライン / 対面 切り替え
+// ===============================
+document.getElementById("tab-online").onclick = () => {
+  currentType = "online";
+  document.getElementById("tab-online").classList.add("active");
+  document.getElementById("tab-offline").classList.remove("active");
+  renderMonthCalendar();
+};
+
+document.getElementById("tab-offline").onclick = () => {
+  currentType = "offline";
+  document.getElementById("tab-online").classList.remove("active");
+  document.getElementById("tab-offline").classList.add("active");
+  renderMonthCalendar();
+};
+
+// ===============================
+// 予約枠取得（Cloud Functions）
+// ===============================
+async function getSlots() {
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "getSlots",
+      type: currentType
+    })
+  });
+
+  return await res.json();
+}
+
+// ===============================
 // 月間カレンダー描画
+// ===============================
 async function renderMonthCalendar() {
-  const slots = await getSlots(); // 既存の関数を利用
+  const slots = await getSlots();
   const slotDates = slots.map(s => s.start.dateTime.split("T")[0]);
 
   const firstDay = new Date(currentYear, currentMonth, 1);
@@ -41,7 +94,9 @@ function isToday(dateStr) {
   return dateStr === today;
 }
 
-// 日付を選択したら枠一覧を表示
+// ===============================
+// 日付選択 → 枠一覧表示
+// ===============================
 async function selectDate(dateStr) {
   const slots = await getSlots();
   const filtered = slots.filter(s => s.start.dateTime.startsWith(dateStr));
@@ -63,7 +118,55 @@ async function selectDate(dateStr) {
   });
 }
 
+// ===============================
+// モーダル表示
+// ===============================
+function openConfirm(start, end) {
+  document.getElementById("confirm-modal").style.display = "block";
+  document.getElementById("confirm-text").textContent =
+    `予約時間：${new Date(start).toLocaleString()}〜${new Date(end).toLocaleString()}`;
+
+  document.getElementById("confirm-ok").onclick = () => reserve(start, end);
+  document.getElementById("confirm-cancel").onclick = () => {
+    document.getElementById("confirm-modal").style.display = "none";
+  };
+}
+
+// ===============================
+// 予約確定（Cloud Functions）
+// ===============================
+async function reserve(start, end) {
+  const userId = liff.getContext().userId;
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "reserve",
+      userId,
+      type: currentType,
+      start,
+      end
+    })
+  });
+
+  const data = await res.json();
+
+  if (data.status === "success") {
+    alert("予約が完了しました！");
+  } else if (data.message === "already_reserved") {
+    alert("その時間はすでに予約されています");
+  } else {
+    alert("予約に失敗しました");
+  }
+
+  document.getElementById("confirm-modal").style.display = "none";
+  renderMonthCalendar();
+}
+
+// ===============================
 // 月移動
+// ===============================
 document.getElementById("prev-month").onclick = () => {
   currentMonth--;
   if (currentMonth < 0) {
@@ -81,6 +184,3 @@ document.getElementById("next-month").onclick = () => {
   }
   renderMonthCalendar();
 };
-
-// 初期表示
-renderMonthCalendar();
