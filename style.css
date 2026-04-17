@@ -217,3 +217,11 @@ body {
   margin-top: 10px;
   font-size: 16px;
 }
+#confirm-modal {
+  z-index: 9000;
+}
+
+#edit-modal {
+  z-index: 9999;
+}
+
