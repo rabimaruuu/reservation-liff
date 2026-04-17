@@ -292,23 +292,32 @@ async function cancelReservation(eventId) {
 // 予約変更モーダル
 // ===============================
 function openEdit(eventId, start, end) {
-  // 予約用モーダルが開いていたら閉じる
   document.getElementById("confirm-modal").style.display = "none";
-
-  // 変更モーダルを開く
   document.getElementById("edit-modal").style.display = "block";
 
   document.getElementById("edit-old-time").textContent =
     `変更前：${new Date(start).toLocaleString()}〜${new Date(end).toLocaleString()}`;
 
-  document.getElementById("edit-start").value = start.slice(0, 16);
-  document.getElementById("edit-end").value = end.slice(0, 16);
+  // datetime-local 用に変換
+  const formatForInput = (dt) => {
+    const d = new Date(dt);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mi = String(d.getMinutes()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+  };
+
+  document.getElementById("edit-start").value = formatForInput(start);
+  document.getElementById("edit-end").value = formatForInput(end);
 
   document.getElementById("edit-ok").onclick = () => updateReservation(eventId);
   document.getElementById("edit-cancel").onclick = () => {
     document.getElementById("edit-modal").style.display = "none";
   };
 }
+
 
 // ===============================
 // 予約変更
