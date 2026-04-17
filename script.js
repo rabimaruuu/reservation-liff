@@ -292,12 +292,15 @@ async function cancelReservation(eventId) {
 // 予約変更モーダル
 // ===============================
 function openEdit(eventId, start, end) {
+  // 予約用モーダルが開いていたら閉じる
+  document.getElementById("confirm-modal").style.display = "none";
+
+  // 変更モーダルを開く
   document.getElementById("edit-modal").style.display = "block";
 
   document.getElementById("edit-old-time").textContent =
     `変更前：${new Date(start).toLocaleString()}〜${new Date(end).toLocaleString()}`;
 
-  // datetime-local 用に整形（YYYY-MM-DDTHH:MM）
   document.getElementById("edit-start").value = start.slice(0, 16);
   document.getElementById("edit-end").value = end.slice(0, 16);
 
