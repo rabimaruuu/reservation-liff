@@ -126,11 +126,18 @@ async function renderHistory() {
 
     container.innerHTML += `
       <div class="history-row">
-        <span>${start}〜${end}</span>
+        <div class="history-info">
+          <span>${start}〜${end}</span>
+        </div>
+        <div class="history-actions">
+          <button class="edit-btn" onclick="openEdit('${e.id}', '${e.start.dateTime}', '${e.end.dateTime}')">変更</button>
+          <button class="cancel-btn" onclick="cancelReservation('${e.id}')">キャンセル</button>
+        </div>
       </div>
     `;
   });
 }
+
 
 
 // ===============================
