@@ -95,6 +95,45 @@ async function getSlots() {
 }
 
 // ===============================
+// 予約履歴取得
+// ===============================
+async function getHistory() {
+  const userId = liff.getContext().userId;
+
+  const res = await fetch(APP_CONFIG.API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "history",
+      userId,
+      type: currentType
+    })
+  });
+
+  return await res.json();
+}
+// ===============================
+// 予約履歴表示
+// ===============================
+async function renderHistory() {
+  const history = await getHistory();
+  const container = document.getElementById("history-list");
+  container.innerHTML = "";
+
+  history.forEach(e => {
+    const start = new Date(e.start.dateTime).toLocaleString();
+    const end = new Date(e.end.dateTime).toLocaleString();
+
+    container.innerHTML += `
+      <div class="history-row">
+        <span>${start}〜${end}</span>
+      </div>
+    `;
+  });
+}
+
+
+// ===============================
 // 月間カレンダー描画
 // ===============================
 async function renderMonthCalendar() {
