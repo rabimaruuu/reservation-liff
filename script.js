@@ -120,7 +120,9 @@ async function renderMonthCalendar() {
   // 日付セル
   for (let day = 1; day <= daysInMonth; day++) {
     const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    const hasSlot = slotDates.includes(dateStr);
+    const today = new Date().toISOString().split("T")[0];
+    const hasSlot = slotDates.includes(dateStr) && dateStr >= today;
+
 
     grid.innerHTML += `
       <div class="calendar-cell ${hasSlot ? "has-slot" : ""} ${isToday(dateStr) ? "today" : ""}"
