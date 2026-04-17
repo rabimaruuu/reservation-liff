@@ -184,3 +184,18 @@ body {
   padding: 20px;
   font-size: 18px;
 }
+
+/* ===============================
+   予約変更表示
+================================ */
+.history-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+.history-actions button {
+  margin-left: 8px;
+}
