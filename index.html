@@ -56,5 +56,23 @@
   <script src="config.js?v=3"></script>
   <script src="script.js?v=3"></script>
 
+  <!-- 予約変更モーダル -->
+<div id="edit-modal" class="modal">
+  <div class="modal-content">
+    <h3>予約変更</h3>
+
+    <p id="edit-old-time"></p>
+
+    <label>新しい開始時間</label>
+    <input type="datetime-local" id="edit-start">
+
+    <label>新しい終了時間</label>
+    <input type="datetime-local" id="edit-end">
+
+    <button id="edit-ok">変更する</button>
+    <button id="edit-cancel">閉じる</button>
+  </div>
+</div>
+
 </body>
 </html>
