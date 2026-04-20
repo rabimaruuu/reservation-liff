@@ -1,20 +1,22 @@
 // ===============================
+// プラン定義（分単位）
+// ===============================
+const PLANS = [
+  { name: "通常（60分）", duration: 60 },
+  { name: "ロング（90分）", duration: 90 },
+  { name: "スペシャル（120分）", duration: 120 }
+];
+
+// ===============================
 // 状態管理
 // ===============================
 let currentYear = new Date().getFullYear();
-let currentMonth = new Date().getMonth(); // 0-11
-let currentType = "online"; // "online" or "offline"
+let currentMonth = new Date().getMonth();
+let currentType = "online";
 
-// 予約枠キャッシュ
-let slotCache = {
-  online: null,
-  offline: null
-};
-let lastFetchTime = {
-  online: 0,
-  offline: 0
-};
-const CACHE_TTL = 5 * 60 * 1000; // 5分
+let slotCache = { online: null, offline: null };
+let lastFetchTime = { online: 0, offline: 0 };
+const CACHE_TTL = 5 * 60 * 1000;
 
 // ===============================
 // デバウンス
@@ -26,7 +28,6 @@ function debounce(fn, delay = 300) {
     timer = setTimeout(() => fn(...args), delay);
   };
 }
-
 const debouncedRender = debounce(renderMonthCalendar, 300);
 
 // ===============================
@@ -40,28 +41,18 @@ window.onload = async () => {
     return;
   }
 
-  // 初期タブ状態
-  document.getElementById("tab-online").classList.add("active");
-  document.getElementById("tab-offline").classList.remove("active");
-
   renderMonthCalendar();
 };
-
 
 // ===============================
 // タブ切り替え
 // ===============================
 document.getElementById("tab-online").onclick = () => {
   currentType = "online";
-  document.getElementById("tab-online").classList.add("active");
-  document.getElementById("tab-offline").classList.remove("active");
   debouncedRender();
 };
-
 document.getElementById("tab-offline").onclick = () => {
   currentType = "offline";
-  document.getElementById("tab-online").classList.remove("active");
-  document.getElementById("tab-offline").classList.add("active");
   debouncedRender();
 };
 
@@ -71,24 +62,17 @@ document.getElementById("tab-offline").onclick = () => {
 async function getSlots() {
   const now = Date.now();
 
-  // キャッシュ有効ならそれを返す
-  if (
-    slotCache[currentType] &&
-    now - lastFetchTime[currentType] < CACHE_TTL
-  ) {
+  if (slotCache[currentType] && now - lastFetchTime[currentType] < CACHE_TTL) {
     return slotCache[currentType];
   }
 
   const res = await fetch(APP_CONFIG.API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "getSlots"
-    })
+    body: JSON.stringify({ action: "getSlots" })
   });
 
   const data = await res.json();
-
   slotCache[currentType] = data;
   lastFetchTime[currentType] = now;
 
@@ -96,53 +80,7 @@ async function getSlots() {
 }
 
 // ===============================
-// 予約履歴取得
-// ===============================
-async function getHistory() {
-  const userId = liff.getContext().userId;
-
-  const res = await fetch(APP_CONFIG.API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "history",
-      userId,
-      type: currentType
-    })
-  });
-
-  return await res.json();
-}
-// ===============================
-// 予約履歴表示
-// ===============================
-async function renderHistory() {
-  const history = await getHistory();
-  const container = document.getElementById("history-list");
-  container.innerHTML = "";
-
-  history.forEach(e => {
-    const start = new Date(e.start.dateTime).toLocaleString();
-    const end = new Date(e.end.dateTime).toLocaleString();
-
-    container.innerHTML += `
-      <div class="history-row">
-        <div class="history-info">
-          <span>${start}〜${end}</span>
-        </div>
-        <div class="history-actions">
-          <button class="edit-btn" onclick="openEdit('${e.id}', '${e.start.dateTime}', '${e.end.dateTime}')">変更</button>
-          <button class="cancel-btn" onclick="cancelReservation('${e.id}')">キャンセル</button>
-        </div>
-      </div>
-    `;
-  });
-}
-
-
-
-// ===============================
-// 月間カレンダー描画
+// 月間カレンダー
 // ===============================
 async function renderMonthCalendar() {
   const slots = await getSlots();
@@ -159,20 +97,15 @@ async function renderMonthCalendar() {
   const grid = document.getElementById("calendar-grid");
   grid.innerHTML = "";
 
-  // 空白セル
-  for (let i = 0; i < startWeekday; i++) {
-    grid.innerHTML += `<div></div>`;
-  }
+  for (let i = 0; i < startWeekday; i++) grid.innerHTML += `<div></div>`;
 
-  // 日付セル
   for (let day = 1; day <= daysInMonth; day++) {
     const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
     const today = new Date().toISOString().split("T")[0];
     const hasSlot = slotDates.includes(dateStr) && dateStr >= today;
 
-
     grid.innerHTML += `
-      <div class="calendar-cell ${hasSlot ? "has-slot" : ""} ${isToday(dateStr) ? "today" : ""}"
+      <div class="calendar-cell ${hasSlot ? "has-slot" : ""}"
            onclick="selectDate('${dateStr}')">
         ${day}
       </div>
@@ -180,13 +113,8 @@ async function renderMonthCalendar() {
   }
 }
 
-function isToday(dateStr) {
-  const today = new Date().toISOString().split("T")[0];
-  return dateStr === today;
-}
-
 // ===============================
-// 日付選択 → 枠一覧表示
+// 日付選択 → 枠一覧
 // ===============================
 async function selectDate(dateStr) {
   const slots = await getSlots();
@@ -198,7 +126,7 @@ async function selectDate(dateStr) {
   container.innerHTML = "";
 
   filtered.forEach(s => {
-    const title = s.summary; // 例：横浜｜14:00-15:00
+    const title = s.summary;
 
     container.innerHTML += `
       <div class="slot-row">
@@ -209,26 +137,90 @@ async function selectDate(dateStr) {
   });
 }
 
-
 // ===============================
-// 新規予約用モーダル
+// 枠選択 → プラン選択
 // ===============================
 function openConfirm(title, dateStr) {
   document.getElementById("confirm-modal").style.display = "block";
-  document.getElementById("confirm-text").textContent =
-    `予約枠：${title}（${dateStr}）`;
 
-  document.getElementById("confirm-ok").onclick = () => reserve(title, dateStr);
+  document.getElementById("confirm-text").innerHTML = `
+    <strong>${dateStr}</strong><br>
+    枠：${title}<br><br>
+    プランを選択してください：
+  `;
+
+  const container = document.getElementById("confirm-options");
+  container.innerHTML = "";
+
+  PLANS.forEach(plan => {
+    const btn = document.createElement("button");
+    btn.className = "plan-btn";
+    btn.textContent = plan.name;
+
+    btn.onclick = () => openTimeSelect(title, dateStr, plan.duration);
+
+    container.appendChild(btn);
+  });
+
   document.getElementById("confirm-cancel").onclick = () => {
     document.getElementById("confirm-modal").style.display = "none";
   };
 }
 
+// ===============================
+// プラン選択 → 時間帯生成
+// ===============================
+function openTimeSelect(title, dateStr, duration) {
+  const [place, timeRange] = title.split("｜");
+  const [startStr, endStr] = timeRange.split("-");
+
+  const frameStart = new Date(`${dateStr}T${startStr}:00`);
+  const frameEnd = new Date(`${dateStr}T${endStr}:00`);
+
+  const options = [];
+  let t = new Date(frameStart);
+
+  while (t.getTime() + duration * 60000 <= frameEnd.getTime()) {
+    const start = new Date(t);
+    const end = new Date(t.getTime() + duration * 60000);
+
+    options.push({
+      start: start.toISOString(),
+      end: end.toISOString(),
+      label: `${formatTime(start)}〜${formatTime(end)}`
+    });
+
+    t = new Date(t.getTime() + 30 * 60000);
+  }
+
+  document.getElementById("confirm-text").innerHTML = `
+    <strong>${dateStr}</strong><br>
+    プラン：${duration}分<br><br>
+    時間帯を選択してください：
+  `;
+
+  const container = document.getElementById("confirm-options");
+  container.innerHTML = "";
+
+  options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "time-btn";
+    btn.textContent = opt.label;
+
+    btn.onclick = () => reserve(opt.start, opt.end);
+
+    container.appendChild(btn);
+  });
+}
+
+function formatTime(d) {
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
 
 // ===============================
 // 予約確定
 // ===============================
-async function reserve(title, dateStr) {
+async function reserve(start, end) {
   const profile = await liff.getProfile();
 
   const res = await fetch(APP_CONFIG.API_URL, {
@@ -238,8 +230,8 @@ async function reserve(title, dateStr) {
       action: "reserve",
       userId: profile.userId,
       displayName: profile.displayName,
-      title,
-      date: dateStr
+      start,
+      end
     })
   });
 
@@ -250,7 +242,7 @@ async function reserve(title, dateStr) {
     slotCache.online = null;
     slotCache.offline = null;
   } else if (data.message === "already_reserved") {
-    alert("その枠はすでに予約されています");
+    alert("その時間はすでに予約されています");
   } else {
     alert("予約に失敗しました");
   }
@@ -258,118 +250,3 @@ async function reserve(title, dateStr) {
   document.getElementById("confirm-modal").style.display = "none";
   renderMonthCalendar();
 }
-
-
-// ===============================
-// 予約キャンセル
-// ===============================
-async function cancelReservation(eventId) {
-  if (!confirm("本当にキャンセルしますか？")) return;
-
-  const res = await fetch(APP_CONFIG.API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "cancel",
-      eventId
-    })
-  });
-
-  const data = await res.json();
-
-  if (data.status === "success") {
-    alert("キャンセルしました");
-    slotCache.online = null;
-    slotCache.offline = null;
-    renderMonthCalendar();
-  } else {
-    alert("キャンセルに失敗しました");
-  }
-}
-
-
-// ===============================
-// 予約変更モーダル
-// ===============================
-function openEdit(eventId, start, end) {
-  document.getElementById("confirm-modal").style.display = "none";
-  document.getElementById("edit-modal").style.display = "block";
-
-  document.getElementById("edit-old-time").textContent =
-    `変更前：${new Date(start).toLocaleString()}〜${new Date(end).toLocaleString()}`;
-
-  // datetime-local 用に変換
-  const formatForInput = (dt) => {
-    const d = new Date(dt);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    const hh = String(d.getHours()).padStart(2, "0");
-    const mi = String(d.getMinutes()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
-  };
-
-  document.getElementById("edit-start").value = formatForInput(start);
-  document.getElementById("edit-end").value = formatForInput(end);
-
-  document.getElementById("edit-ok").onclick = () => updateReservation(eventId);
-  document.getElementById("edit-cancel").onclick = () => {
-    document.getElementById("edit-modal").style.display = "none";
-  };
-}
-
-
-// ===============================
-// 予約変更
-// ===============================
-async function updateReservation(eventId) {
-  const newStart = document.getElementById("edit-start").value;
-  const newEnd = document.getElementById("edit-end").value;
-
-  const res = await fetch(APP_CONFIG.API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "update",
-      eventId,
-      start: newStart,
-      end: newEnd
-    })
-  });
-
-  const data = await res.json();
-
-  if (data.status === "success") {
-    alert("予約を変更しました");
-    slotCache.online = null;
-    slotCache.offline = null;
-    renderMonthCalendar();
-  } else if (data.message === "already_reserved") {
-    alert("その時間はすでに予約されています");
-  } else {
-    alert("変更に失敗しました");
-  }
-
-  document.getElementById("edit-modal").style.display = "none";
-}
-
-// ===============================
-// 月移動
-// ===============================
-document.getElementById("prev-month").onclick = () => {
-  currentMonth--;
-  if (currentMonth < 0) {
-    currentMonth = 11;
-    currentYear--;
-  }
-  debouncedRender();
-};
-
-document.getElementById("next-month").onclick = () => {
-  currentMonth++;
-  if (currentMonth > 11) {
-    currentMonth = 0;
-    currentYear++;
-  }
-  debouncedRender();
-};
