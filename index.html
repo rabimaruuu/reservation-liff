@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>予約システム</title>
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 
 <body>
@@ -30,17 +30,16 @@
       <div id="slots"></div>
   </div>
 
-  <!-- 予約確認モーダル（新UI） -->
+  <!-- 予約モーダル -->
   <div id="confirm-modal" class="modal">
     <div class="modal-content">
       <p id="confirm-text"></p>
-
-      <button id="confirm-ok">予約する</button>
-      <button id="confirm-cancel">キャンセル</button>
+      <div id="confirm-options"></div>
+      <button id="confirm-cancel">閉じる</button>
     </div>
   </div>
 
-  <!-- 予約変更モーダル（旧UIのまま利用OK） -->
+  <!-- 予約変更モーダル -->
   <div id="edit-modal" class="modal">
     <div class="modal-content">
       <h3>予約変更</h3>
@@ -58,9 +57,9 @@
     </div>
   </div>
 
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js?v=3"></script>
-  <script src="config.js?v=3"></script>
-  <script src="script.js?v=3"></script>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js?v=4"></script>
+  <script src="config.js?v=4"></script>
+  <script src="script.js?v=4"></script>
 
 </body>
 </html>
