@@ -14,8 +14,15 @@
       <button id="tab-offline">対面</button>
   </div>
 
-  <!-- カレンダー（必要なら使う） -->
-  <div id="calendar"></div>
+  <!-- 月間カレンダー -->
+  <div id="month-calendar">
+    <div id="calendar-header">
+      <button id="prev-month">＜</button>
+      <span id="calendar-title"></span>
+      <button id="next-month">＞</button>
+    </div>
+    <div id="calendar-grid"></div>
+  </div>
 
   <!-- 枠一覧 -->
   <div id="slot-list">
@@ -23,56 +30,37 @@
       <div id="slots"></div>
   </div>
 
-  <!-- モーダル -->
+  <!-- 予約確認モーダル（新UI） -->
   <div id="confirm-modal" class="modal">
     <div class="modal-content">
       <p id="confirm-text"></p>
-
-      <label>開始時間</label>
-      <select id="start-time"></select>
-
-      <label>終了時間</label>
-      <select id="end-time"></select>
 
       <button id="confirm-ok">予約する</button>
       <button id="confirm-cancel">キャンセル</button>
     </div>
   </div>
 
-  <!-- 月間カレンダー -->
-<div id="month-calendar">
-  <div id="calendar-header">
-    <button id="prev-month">＜</button>
-    <span id="calendar-title"></span>
-    <button id="next-month">＞</button>
-  </div>
-  <div id="calendar-grid"></div>
-</div>
+  <!-- 予約変更モーダル（旧UIのまま利用OK） -->
+  <div id="edit-modal" class="modal">
+    <div class="modal-content">
+      <h3>予約変更</h3>
 
-  <!-- ローディング -->
-  <div id="loading" style="display:none;">読み込み中...</div>
+      <p id="edit-old-time"></p>
+
+      <label>新しい開始時間</label>
+      <input type="datetime-local" id="edit-start">
+
+      <label>新しい終了時間</label>
+      <input type="datetime-local" id="edit-end">
+
+      <button id="edit-ok">変更する</button>
+      <button id="edit-cancel">閉じる</button>
+    </div>
+  </div>
 
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js?v=3"></script>
   <script src="config.js?v=3"></script>
   <script src="script.js?v=3"></script>
-
-  <!-- 予約変更モーダル -->
-<div id="edit-modal" class="modal">
-  <div class="modal-content">
-    <h3>予約変更</h3>
-
-    <p id="edit-old-time"></p>
-
-    <label>新しい開始時間</label>
-    <input type="datetime-local" id="edit-start">
-
-    <label>新しい終了時間</label>
-    <input type="datetime-local" id="edit-end">
-
-    <button id="edit-ok">変更する</button>
-    <button id="edit-cancel">閉じる</button>
-  </div>
-</div>
 
 </body>
 </html>
