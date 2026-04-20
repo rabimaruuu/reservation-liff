@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>予約履歴</title>
+  <link rel="stylesheet" href="style.css?v=4">
+</head>
+
+<body>
+
+  <h2>今までの予約</h2>
+
+  <!-- 履歴一覧 -->
+  <div id="history-list"></div>
+
+  <!-- 予約変更モーダル -->
+  <div id="edit-modal" class="modal">
+    <div class="modal-content">
+      <h3>予約変更</h3>
+
+      <p id="edit-old-time"></p>
+
+      <label>新しい開始時間</label>
+      <input type="datetime-local" id="edit-start">
+
+      <label>新しい終了時間</label>
+      <input type="datetime-local" id="edit-end">
+
+      <button id="edit-ok">変更する</button>
+      <button id="edit-cancel">閉じる</button>
+    </div>
+  </div>
+
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js?v=4"></script>
+  <script src="config.js?v=4"></script>
+  <script src="history.js?v=4"></script>
+
+</body>
+</html>
