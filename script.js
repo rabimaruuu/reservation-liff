@@ -12,7 +12,7 @@ const PLANS = [
 // ===============================
 let currentYear = new Date().getFullYear();
 let currentMonth = new Date().getMonth();
-let currentType = "online";
+let currentType = "online"; // "online" | "offline"
 
 let slotCache = { online: null, offline: null };
 let lastFetchTime = { online: 0, offline: 0 };
@@ -57,12 +57,33 @@ document.getElementById("tab-offline").onclick = () => {
 };
 
 // ===============================
+// タイトルから種別判定
+// ===============================
+function detectTypeFromTitle(title) {
+  const hasOnline = title.includes("オンライン");
+  const hasOffline = title.includes("対面");
+
+  if (hasOnline && hasOffline) return "both";
+  if (hasOnline) return "online";
+  if (hasOffline) return "offline";
+  return "both"; // 種別が書いてない枠は両方OK扱い
+}
+
+// ===============================
+// 時刻フォーマット
+// ===============================
+function formatTime(d) {
+  const h = String(d.getHours()).padStart(2, "0");
+  const m = String(d.getMinutes()).padStart(2, "0");
+  return `${h}:${m}`;
+}
+
+// ===============================
 // 予約枠取得（キャッシュ付き）
 // ===============================
 async function getSlots() {
   const now = Date.now();
 
-  // キャッシュが存在しない場合は無視
   if (
     slotCache[currentType] &&
     lastFetchTime[currentType] &&
@@ -79,23 +100,30 @@ async function getSlots() {
 
   const data = await res.json();
 
-  // ★ frames が存在しない場合は空配列にする（これが重要）
   const frames = data.frames || [];
   const bookings = data.bookings || [];
 
+  // 予約イベントは全タイプ共通で保持（オンライン/対面両方の予約を含む）
   window.currentBookings = bookings;
-  slotCache[currentType] = frames;
+
+  // ★ タブの種別に応じて枠を絞り込む
+  const filteredFrames = frames.filter(f => {
+    const t = detectTypeFromTitle(f.summary || "");
+    if (t === "both") return true;
+    return t === currentType;
+  });
+
+  slotCache[currentType] = filteredFrames;
   lastFetchTime[currentType] = now;
 
-  return frames;
+  return filteredFrames;
 }
-
 
 // ===============================
 // 月間カレンダー
 // ===============================
 async function renderMonthCalendar() {
-  const frames = await getSlots(); 
+  const frames = await getSlots();
   const slotDates = frames.map(s => s.start.dateTime.split("T")[0]);
 
   const firstDay = new Date(currentYear, currentMonth, 1);
@@ -123,6 +151,8 @@ async function renderMonthCalendar() {
       </div>
     `;
   }
+
+  // デフォルトで今日以降の最初の枠日を選択してもいいならここで selectDate 呼んでもOK
 }
 
 // ===============================
@@ -147,6 +177,10 @@ async function selectDate(dateStr) {
       </div>
     `;
   });
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div>この日の空き枠はありません</div>`;
+  }
 }
 
 // ===============================
@@ -191,22 +225,24 @@ function openConfirm(title, dateStr) {
 // プラン選択 → 時間帯生成
 // ===============================
 function openTimeSelect(title, dateStr, duration, slotType) {
-  const [place, timeRange] = title.split("｜");
+  const parts = title.split("｜");
+  // 例: 「横浜｜09:00-17:30｜オンライン」
+  // [0]=場所, [1]=時間帯, [2]=種別
+  const place = parts[0];
+  const timeRange = parts[1] || "";
   const [startStr, endStr] = timeRange.split("-");
 
   const frameStart = new Date(`${dateStr}T${startStr}:00`);
   const frameEnd = new Date(`${dateStr}T${endStr}:00`);
 
-  // ★ 予約イベントを取得
-const bookings = window.currentBookings
-  .filter(b => b.start.dateTime.startsWith(dateStr))
-  .map(b => ({
-    start: new Date(b.start.dateTime),
-    end: new Date(b.end.dateTime)
-  }));
+  // 予約イベントを取得（この日はすべて対象）
+  const bookings = (window.currentBookings || [])
+    .filter(b => b.start.dateTime.startsWith(dateStr))
+    .map(b => ({
+      start: new Date(b.start.dateTime),
+      end: new Date(b.end.dateTime)
+    }));
 
-
-  // ★ 空き時間帯を生成
   const freeRanges = subtractBookings(
     { start: frameStart, end: frameEnd },
     bookings
@@ -231,7 +267,6 @@ const bookings = window.currentBookings
     }
   });
 
-  // UI 表示はそのまま
   document.getElementById("confirm-text").innerHTML = `
     <strong>${dateStr}</strong><br>
     プラン：${duration}分<br><br>
@@ -240,6 +275,11 @@ const bookings = window.currentBookings
 
   const container = document.getElementById("confirm-options");
   container.innerHTML = "";
+
+  if (options.length === 0) {
+    container.innerHTML = `<div>このプランで予約可能な時間帯はありません</div>`;
+    return;
+  }
 
   options.forEach(opt => {
     const btn = document.createElement("button");
@@ -253,12 +293,46 @@ const bookings = window.currentBookings
 }
 
 // ===============================
+// 予約枠から予約済みを引く
+// ===============================
+function subtractBookings(frame, bookings) {
+  // frame: { start: Date, end: Date }
+  // bookings: [{ start: Date, end: Date }]
+  let ranges = [{ start: frame.start, end: frame.end }];
+
+  bookings.forEach(b => {
+    const newRanges = [];
+
+    ranges.forEach(r => {
+      // 完全に被らない
+      if (b.end <= r.start || b.start >= r.end) {
+        newRanges.push(r);
+        return;
+      }
+
+      // 前側が空く
+      if (b.start > r.start) {
+        newRanges.push({ start: r.start, end: b.start });
+      }
+
+      // 後ろ側が空く
+      if (b.end < r.end) {
+        newRanges.push({ start: b.end, end: r.end });
+      }
+    });
+
+    ranges = newRanges;
+  });
+
+  return ranges;
+}
+
+// ===============================
 // 予約確定
 // ===============================
 async function reserve(start, end, slotType) {
   const profile = await liff.getProfile();
 
-  // slotType が both の場合は currentType を使う
   const finalType = slotType === "both" ? currentType : slotType;
 
   const res = await fetch(APP_CONFIG.API_URL, {
@@ -270,7 +344,7 @@ async function reserve(start, end, slotType) {
       displayName: profile.displayName,
       start,
       end,
-      type: finalType   // ← これが超重要！
+      type: finalType
     })
   });
 
