@@ -59,41 +59,27 @@ document.getElementById("tab-offline").onclick = () => {
 // ===============================
 // 予約枠取得（キャッシュ付き）
 // ===============================
-if (req.body.action === "getSlots") {
-  try {
-    // オンライン・対面の両方のカレンダーから取得
-    const onlineEvents = await calendar.events.list({
-      calendarId: ONLINE_CALENDAR_ID,
-      singleEvents: true,
-      orderBy: "startTime"
-    });
+async function getSlots() {
+  const now = Date.now();
 
-    const offlineEvents = await calendar.events.list({
-      calendarId: OFFLINE_CALENDAR_ID,
-      singleEvents: true,
-      orderBy: "startTime"
-    });
-
-    const allEvents = [
-      ...onlineEvents.data.items,
-      ...offlineEvents.data.items
-    ];
-
-    // ★ 枠イベント（frames）と予約イベント（bookings）に分ける
-    const frames = allEvents.filter(e => !e.summary.startsWith("予約"));
-    const bookings = allEvents.filter(e => e.summary.startsWith("予約"));
-
-    return res.json({
-      frames,
-      bookings
-    });
-
-  } catch (e) {
-    console.error(e);
-    return res.json({ status: "error", message: "getSlots failed" });
+  if (slotCache[currentType] && now - lastFetchTime[currentType] < CACHE_TTL) {
+    return slotCache[currentType];
   }
-}
 
+  const res = await fetch(APP_CONFIG.API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "getSlots" })
+  });
+
+  const data = await res.json();
+
+  window.currentBookings = data.bookings || [];
+  slotCache[currentType] = data.frames;
+  lastFetchTime[currentType] = now;
+
+  return data.frames;
+}
 
 // ===============================
 // 月間カレンダー
