@@ -62,7 +62,12 @@ document.getElementById("tab-offline").onclick = () => {
 async function getSlots() {
   const now = Date.now();
 
-  if (slotCache[currentType] && now - lastFetchTime[currentType] < CACHE_TTL) {
+  // キャッシュが存在しない場合は無視
+  if (
+    slotCache[currentType] &&
+    lastFetchTime[currentType] &&
+    now - lastFetchTime[currentType] < CACHE_TTL
+  ) {
     return slotCache[currentType];
   }
 
@@ -74,12 +79,17 @@ async function getSlots() {
 
   const data = await res.json();
 
-  window.currentBookings = data.bookings || [];
-  slotCache[currentType] = data.frames;
+  // ★ frames が存在しない場合は空配列にする（これが重要）
+  const frames = data.frames || [];
+  const bookings = data.bookings || [];
+
+  window.currentBookings = bookings;
+  slotCache[currentType] = frames;
   lastFetchTime[currentType] = now;
 
-  return data.frames;
+  return frames;
 }
+
 
 // ===============================
 // 月間カレンダー
