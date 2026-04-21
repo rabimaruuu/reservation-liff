@@ -214,12 +214,13 @@ function openTimeSelect(title, dateStr, duration, slotType) {
   const frameEnd = new Date(`${dateStr}T${endStr}:00`);
 
   // ★ 予約イベントを取得
-  const bookings = window.currentBookings
-    .filter(b => b.date === dateStr)
-    .map(b => ({
-      start: new Date(b.start),
-      end: new Date(b.end)
-    }));
+const bookings = window.currentBookings
+  .filter(b => b.start.dateTime.startsWith(dateStr))
+  .map(b => ({
+    start: new Date(b.start.dateTime),
+    end: new Date(b.end.dateTime)
+  }));
+
 
   // ★ 空き時間帯を生成
   const freeRanges = subtractBookings(
