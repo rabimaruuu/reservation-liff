@@ -85,8 +85,8 @@ async function getSlots() {
 // 月間カレンダー
 // ===============================
 async function renderMonthCalendar() {
-  const slots = await getSlots();
-  const slotDates = slots.map(s => s.start.dateTime.split("T")[0]);
+  const frames = await getSlots(); 
+  const slotDates = frames.map(s => s.start.dateTime.split("T")[0]);
 
   const firstDay = new Date(currentYear, currentMonth, 1);
   const lastDay = new Date(currentYear, currentMonth + 1, 0);
