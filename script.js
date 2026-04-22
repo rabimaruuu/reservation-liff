@@ -348,8 +348,7 @@ async function reserve(start, end, slotType) {
 
   if (data.status === "success") {
     alert("予約が完了しました！");
-    slotCache.online = null;
-    slotCache.offline = null;
+    slotCache = null;
   } else if (data.message === "already_reserved") {
     alert("その時間はすでに予約されています");
   } else {
