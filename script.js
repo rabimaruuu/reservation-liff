@@ -14,8 +14,8 @@ let currentYear = new Date().getFullYear();
 let currentMonth = new Date().getMonth();
 let currentType = "online"; // "online" | "offline"
 
-let slotCache = { online: null, offline: null };
-let lastFetchTime = { online: 0, offline: 0 };
+let slotCache = null;
+let lastFetchTime = 0;
 const CACHE_TTL = 5 * 60 * 1000;
 
 // ===============================
@@ -112,8 +112,8 @@ async function getSlots() {
     return t === currentType;
   });
 
-  slotCache[currentType] = filteredFrames;
-  lastFetchTime[currentType] = now;
+  slotCache = filteredFrames;
+  lastFetchTime = now;
 
   return filteredFrames;
 }
