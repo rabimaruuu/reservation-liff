@@ -159,6 +159,7 @@ async function renderMonthCalendar() {
 // 日付選択 → 枠一覧
 // ===============================
 async function selectDate(dateStr) {
+  console.log("clicked dateStr:", dateStr); 
   const slots = await getSlots();
   const filtered = slots.filter(s => s.start.dateTime.startsWith(dateStr));
 
