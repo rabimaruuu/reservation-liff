@@ -60,13 +60,12 @@ document.getElementById("tab-offline").onclick = () => {
 // タイトルから種別判定
 // ===============================
 function detectTypeFromTitle(title) {
-  const hasOnline = title.includes("オンライン");
-  const hasOffline = title.includes("対面");
+  if (!title) return "both";
 
-  if (hasOnline && hasOffline) return "both";
-  if (hasOnline) return "online";
-  if (hasOffline) return "offline";
-  return "both"; // 種別が書いてない枠は両方OK扱い
+  if (title.includes("オンライン")) return "online";
+  if (title.includes("対面")) return "offline";
+
+  return "both"; // 種別なしは両方OK
 }
 
 // ===============================
