@@ -83,13 +83,9 @@ function formatTime(d) {
 async function getSlots() {
   const now = Date.now();
 
-  if (
-    slotCache[currentType] &&
-    lastFetchTime[currentType] &&
-    now - lastFetchTime[currentType] < CACHE_TTL
-  ) {
-    return slotCache[currentType];
-  }
+if (slotCache && lastFetchTime && now - lastFetchTime < CACHE_TTL) {
+  return slotCache;
+}
 
   const res = await fetch(APP_CONFIG.API_URL, {
     method: "POST",
