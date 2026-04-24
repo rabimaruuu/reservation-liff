@@ -24,6 +24,7 @@ async function getHistory() {
     body: JSON.stringify({
       action: "history",
       userId: profile.userId
+      type: "online"   // ← オンライン履歴
     })
   });
 
