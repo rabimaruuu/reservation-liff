@@ -81,6 +81,7 @@ function formatTime(d) {
 // 予約枠取得（キャッシュ付き）
 // ===============================
 async function getSlots() {
+  console.log("getSlots() called");
   const now = Date.now();
 
 if (slotCache && lastFetchTime && now - lastFetchTime < CACHE_TTL) {
@@ -94,6 +95,7 @@ if (slotCache && lastFetchTime && now - lastFetchTime < CACHE_TTL) {
   });
 
   const data = await res.json();
+  console.log("getSlots response:", data);
 
   const frames = data.frames || [];
   const bookings = data.bookings || [];
@@ -157,6 +159,7 @@ async function selectDate(dateStr) {
   console.log("clicked dateStr:", dateStr); 
   const slots = await getSlots();
   const filtered = slots.filter(s => s.start.dateTime.startsWith(dateStr));
+  console.log("selectDate:", dateStr, filtered);
 
   document.getElementById("slot-title").textContent = `${dateStr} の空き枠`;
 
