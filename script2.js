@@ -158,7 +158,15 @@ async function renderMonthCalendar() {
 async function selectDate(dateStr) {
   console.log("clicked dateStr:", dateStr); 
   const slots = await getSlots();
-  const filtered = slots.filter(s => s.start.dateTime.startsWith(dateStr));
+    const filtered = slots.filter(s => {
+    const d = new Date(s.start.dateTime);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const slotDate = `${y}-${m}-${day}`;
+    console.log("slot:", s.start.dateTime, "→", slotDate);
+    return slotDate === dateStr;
+  });
   console.log("selectDate:", dateStr, filtered);
 
   document.getElementById("slot-title").textContent = `${dateStr} の空き枠`;
