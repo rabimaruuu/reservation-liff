@@ -224,4 +224,9 @@ body {
 #edit-modal {
   z-index: 9999;
 }
+.no-slot {
+  color: red;
+  font-weight: bold;
+  padding: 10px;
+}
 
