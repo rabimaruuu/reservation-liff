@@ -60,6 +60,49 @@ body {
 .slot-btn:hover {
   background: #f0f8ff;
 }
+/* ===============================
+   最終確認モーダル
+================================ */
+#final-confirm-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 9999;
+}
+
+#final-confirm-modal .modal-content {
+  background: #fff;
+  padding: 20px;
+  margin: 120px auto;
+  width: 90%;
+  max-width: 400px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  text-align: center;
+}
+
+#final-confirm-buttons button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+#final-confirm-ok {
+  background: #4a90e2;
+  color: white;
+}
+
+#final-confirm-cancel {
+  background: #ccc;
+}
+
 
 /* ===============================
    モーダル（背景）
