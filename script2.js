@@ -338,13 +338,13 @@ function subtractBookings(frame, bookings) {
 // 最終確認画面
 // ===============================
 function openFinalConfirm(start, end, slotType, duration, dateStr) {
-  const modal = document.getElementById("confirm-modal");
+  const modal = document.getElementById("final-confirm-modal");
   modal.style.display = "block";
 
   const startTime = start.split("T")[1].substring(0,5);
   const endTime = end.split("T")[1].substring(0,5);
 
-  document.getElementById("confirm-text").innerHTML = `
+  document.getElementById("final-confirm-text").innerHTML = `
     <strong>予約内容の確認</strong><br><br>
     日付：${dateStr}<br>
     時間：${startTime}〜${endTime}<br>
@@ -353,23 +353,16 @@ function openFinalConfirm(start, end, slotType, duration, dateStr) {
     この内容で予約しますか？
   `;
 
-  const container = document.getElementById("confirm-options");
-  container.innerHTML = "";
-
-  const okBtn = document.createElement("button");
-  okBtn.textContent = "予約を確定する";
-  okBtn.className = "plan-btn";
-  okBtn.onclick = () => reserve(start, end, slotType);
-
-  const cancelBtn = document.createElement("button");
-  cancelBtn.textContent = "戻る";
-  cancelBtn.className = "plan-btn";
-  cancelBtn.onclick = () => {
+  // 確定ボタン
+  document.getElementById("final-confirm-ok").onclick = () => {
     modal.style.display = "none";
+    reserve(start, end, slotType);
   };
 
-  container.appendChild(okBtn);
-  container.appendChild(cancelBtn);
+  // 戻るボタン
+  document.getElementById("final-confirm-cancel").onclick = () => {
+    modal.style.display = "none";
+  };
 }
 
 
