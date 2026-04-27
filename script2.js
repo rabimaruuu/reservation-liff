@@ -293,7 +293,7 @@ function openTimeSelect(title, dateStr, duration, slotType) {
     btn.className = "time-btn";
     btn.textContent = opt.label;
 
-    btn.onclick = () => reserve(opt.start, opt.end, slotType);
+    btn.onclick = () => openFinalConfirm(opt.start, opt.end, slotType, duration, dateStr);
 
     container.appendChild(btn);
   });
@@ -333,6 +333,45 @@ function subtractBookings(frame, bookings) {
 
   return ranges;
 }
+
+// ===============================
+// 最終確認画面
+// ===============================
+function openFinalConfirm(start, end, slotType, duration, dateStr) {
+  const modal = document.getElementById("confirm-modal");
+  modal.style.display = "block";
+
+  const startTime = start.split("T")[1].substring(0,5);
+  const endTime = end.split("T")[1].substring(0,5);
+
+  document.getElementById("confirm-text").innerHTML = `
+    <strong>予約内容の確認</strong><br><br>
+    日付：${dateStr}<br>
+    時間：${startTime}〜${endTime}<br>
+    プラン：${duration}分<br>
+    種別：${slotType === "online" ? "オンライン" : "対面"}<br><br>
+    この内容で予約しますか？
+  `;
+
+  const container = document.getElementById("confirm-options");
+  container.innerHTML = "";
+
+  const okBtn = document.createElement("button");
+  okBtn.textContent = "予約を確定する";
+  okBtn.className = "plan-btn";
+  okBtn.onclick = () => reserve(start, end, slotType);
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.textContent = "戻る";
+  cancelBtn.className = "plan-btn";
+  cancelBtn.onclick = () => {
+    modal.style.display = "none";
+  };
+
+  container.appendChild(okBtn);
+  container.appendChild(cancelBtn);
+}
+
 
 // ===============================
 // 予約確定
