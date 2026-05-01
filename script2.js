@@ -1,11 +1,84 @@
+let selectedPlan = null;
+let selectedDate = null;
+
 // ===============================
 // プラン定義（分単位）
 // ===============================
 const PLANS = [
-  { name: "通常（60分）", duration: 60 },
-  { name: "ロング（90分）", duration: 90 },
-  { name: "スペシャル（120分）", duration: 120 }
+  {
+    id: "counseling_60",
+    name: "個人カウンセリング60分",
+    duration: 60,
+    min_people: 1,
+    max_people: 1,
+    allowed_roles: ["一般", "卒業生", "紹介", "特定講師受講者"],
+    allowed_teachers: ["A", "B", "C"]
+  },
+  {
+    id: "counseling_90",
+    name: "個人カウンセリング90分",
+    duration: 90,
+    min_people: 1,
+    max_people: 1,
+    allowed_roles: ["一般", "卒業生", "紹介", "特定講師受講者"],
+    allowed_teachers: ["A", "B", "C"]
+  },
+  {
+    id: "group_counseling",
+    name: "グループカウンセリング",
+    duration: 60,
+    min_people: 2,
+    max_people: 6,
+    allowed_roles: ["一般", "卒業生", "紹介"],
+    allowed_teachers: ["A", "B"]
+  },
+  {
+    id: "workshop",
+    name: "ワークショップ",
+    duration: 120,
+    min_people: 3,
+    max_people: 20,
+    allowed_roles: ["一般", "卒業生", "紹介"],
+    allowed_teachers: ["B", "C"]
+  },
+  {
+    id: "lecture",
+    name: "講座",
+    duration: 120,
+    min_people: 1,
+    max_people: 50,
+    allowed_roles: ["一般", "卒業生", "紹介"],
+    allowed_teachers: ["B", "C"]
+  },
+  {
+    id: "graduate_only",
+    name: "卒業生限定セッション",
+    duration: 60,
+    min_people: 1,
+    max_people: 1,
+    allowed_roles: ["卒業生"],
+    allowed_teachers: ["A"]
+  },
+  {
+    id: "referral_only",
+    name: "紹介限定セッション",
+    duration: 60,
+    min_people: 1,
+    max_people: 1,
+    allowed_roles: ["紹介"],
+    allowed_teachers: ["A", "B"]
+  },
+  {
+    id: "special_teacher_only",
+    name: "特定講師受講者限定セッション",
+    duration: 60,
+    min_people: 1,
+    max_people: 1,
+    allowed_roles: ["特定講師受講者"],
+    allowed_teachers: ["C"]
+  }
 ];
+
 
 // ===============================
 // 状態管理
@@ -227,6 +300,43 @@ function openConfirm(title, dateStr) {
     document.getElementById("confirm-modal").style.display = "none";
   };
 }
+
+// ===============================
+// プラン選択
+// ===============================
+function openPlanModal(dateStr) {
+  selectedDate = dateStr;
+
+  const modal = document.getElementById("confirm-modal");
+  const options = document.getElementById("confirm-options");
+  const text = document.getElementById("confirm-text");
+
+  text.textContent = "プランを選択してください";
+  options.innerHTML = "";
+
+  PLANS.forEach(plan => {
+    const btn = document.createElement("button");
+    btn.textContent = plan.name;
+    btn.onclick = () => selectPlan(plan);
+    options.appendChild(btn);
+  });
+
+  modal.style.display = "block";
+}
+
+// ===============================
+// プラン選択 → 枠を表示
+// ===============================
+function selectPlan(plan) {
+  selectedPlan = plan;
+
+  // モーダル閉じる
+  document.getElementById("confirm-modal").style.display = "none";
+
+  // プランに合う枠だけ表示
+  selectDateWithPlan(selectedDate);
+}
+
 
 // ===============================
 // プラン選択 → 時間帯生成
