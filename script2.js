@@ -18,15 +18,32 @@ async function loadSlotsFromFirestore() {
     .orderBy("start")
     .get();
 
-  const slots = snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }));
+  const slots = snapshot.docs.map(doc => {
+    const d = doc.data();
 
-  console.log("Firestore slots:", slots);
-  renderSlots(slots);
+    return {
+      id: doc.id,
+
+      // UI が期待する summary 形式に変換
+      summary: `${d.place || "場所未設定"}｜${d.start}-${d.end}｜${d.type === "online" ? "オンライン" : "対面"}`,
+
+      // UI が期待する Google Calendar 形式に変換
+      start: { dateTime: `${d.date}T${d.start}:00+09:00` },
+      end:   { dateTime: `${d.date}T${d.end}:00+09:00` },
+
+      type: d.type
+    };
+  });
+
+  console.log("Firestore slots (converted):", slots);
+
+  // Cloud Functions の getSlots と同じキャッシュ構造にする
+  slotCache = slots;
+  lastFetchTime = Date.now();
+
+  // カレンダー再描画
+  renderMonthCalendar();
 }
-
 
 // ===============================
 // プラン定義（分単位）
