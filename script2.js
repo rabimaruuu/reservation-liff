@@ -1,5 +1,32 @@
 let selectedPlan = null;
 let selectedDate = null;
+// ===============================
+// Firebase 初期化
+// ===============================
+firebase.initializeApp({
+  apiKey: "AIzaSyBzi9sL8gC_NtZKLir541tGL4fHuPRR8U0",
+  authDomain: "reservation-system-492915.firebaseapp.com",
+  projectId: "reservation-system-492915",
+});
+const db = firebase.firestore();
+
+
+async function loadSlotsFromFirestore() {
+  const snapshot = await db.collection("slots")
+    .where("isBooked", "==", false)
+    .orderBy("date")
+    .orderBy("start")
+    .get();
+
+  const slots = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }));
+
+  console.log("Firestore slots:", slots);
+  renderSlots(slots);
+}
+
 
 // ===============================
 // プラン定義（分単位）
