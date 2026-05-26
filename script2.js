@@ -141,7 +141,7 @@ window.onload = async () => {
     return;
   }
 
-  renderMonthCalendar();
+  loadSlotsFromFirestore();
 };
 
 // ===============================
