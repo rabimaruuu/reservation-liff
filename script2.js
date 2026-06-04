@@ -22,12 +22,12 @@ async function loadSlotsFromFirestore() {
     const d = doc.data();
 
     // 🔥 日付＋時刻を結合して完全なISO形式に変換
-    const startDateTime = `${d.date}T${d.start}:00+09:00`;
-    const endDateTime   = `${d.date}T${d.end}:00+09:00`;
+    const startDateTime = `${d.date}T${d.start.padStart(5, "0")}:00+09:00`;
+    const endDateTime   = `${d.date}T${d.end.padStart(5, "0")}:00+09:00`;
 
     return {
       id: doc.id,
-      summary: `${d.place || "場所未設定"}｜${d.start}-${d.end}｜${d.type === "online" ? "オンライン" : d.type === "offline" ? "対面" : "両方"}`,
+      summary: `${d.start}-${d.end}｜${d.type === "online" ? "オンライン" : d.type === "offline" ? "対面" : "両方"}`,
       start: { dateTime: startDateTime },
       end:   { dateTime: endDateTime },
       type: d.type
